@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Mock chat (turbo test)</title>
+<style>
+  body { font-family: sans-serif; background: #1e1f25; color: #eee; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+  #messages { flex: 1; overflow: auto; padding: 12px; }
+  .msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; max-width: 90%; white-space: pre-wrap; }
+  .user { background: #2b2c34; margin-left: auto; }
+  .bot { background: #243044; }
+  .bar { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #333; }
+  textarea { flex: 1; height: 44px; background: #141419; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 8px; }
+  button { padding: 6px 14px; }
+</style>
+</head>
+<body>
+  <div id="messages"></div>
+  <div class="bar">
+    <textarea id="in" placeholder="type here"></textarea>
+    <button id="send" aria-label="Send">Send</button>
+  </div>
+<script>
+  const messages = document.getElementById('messages');
+  const input = document.getElementById('in');
+  function add(role, text) {
+    const d = document.createElement('div');
+    d.className = 'msg ' + role;
+    d.textContent = text;
+    messages.appendChild(d);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function reply(userText) {
+    if (userText.startsWith('[TOOL RESULT]')) {
+      setTimeout(() => add('bot', 'ALL_DONE — the file was created successfully by the IDE agent.'), 300);
+    } else {
+      const m = userText.match(/[\w.-]+\.(txt|md|js|htmlx)/i);
+      const file = m ? m[0] : 'untitled.txt';
+      const block = '\n```ocx\n' + JSON.stringify({ tool: 'write_file', args: { path: file, content: 'created by turbo bridge test at ' + new Date().toISOString() + '\n' } }, null, 1) + '\n```';
+      setTimeout(() => add('bot', 'Sure, creating ' + file + ' using my IDE tool.' + block), 400);
+    }
+  }
+  function send() {
+    const t = input.value.trim();
+    if (!t) return;
+    add('user', t);
+    input.value = '';
+    reply(t);
+  }
+  document.getElementById('send').addEventListener('click', send);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+  add('bot', 'Mock chat ready.');
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; worker-src blob:;" />
+  <title>OpenCodex IDE</title>
+  <link rel="stylesheet" href="node_modules/@xterm/xterm/css/xterm.css" />
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <!-- SVG icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1" stroke-linecap="round"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.4.6L12.4 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21" stroke-linecap="round"/></symbol>
+      <symbol id="i-bot" viewBox="0 0 24 24"><rect x="5" y="9" width="14" height="10" rx="2.5"/><path d="M12 9V5.5" stroke-linecap="round"/><circle cx="12" cy="4.5" r="1.2"/><circle cx="9.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M9.5 16.6h5" stroke-linecap="round"/></symbol>
+      <symbol id="i-tasks" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4.5" height="14" rx="1.5"/></symbol>
+      <symbol id="i-skills" viewBox="0 0 24 24"><path d="M4 19V6a2 2 0 0 1 2-2h13v13H6a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h13" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 8h6" stroke-linecap="round"/></symbol>
+      <symbol id="i-bridge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4.2 5.6 4.2 9S14.8 18.4 12 21c-2.8-2.6-4.2-5.6-4.2-9S9.2 5.6 12 3z"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.4"/><path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M5.6 5.6l2.3 2.3M16.1 16.1l2.3 2.3M18.4 5.6l-2.3 2.3M7.9 16.1l-2.3 2.3" stroke-linecap="round"/></symbol>
+      <symbol id="i-openfolder" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.4.6L12.4 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 13.5h6M12 10.5v6" stroke-linecap="round"/></symbol>
+      <symbol id="i-newfile" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5" stroke-linecap="round"/><path d="M12 11.5v5M9.5 14h5" stroke-linecap="round"/></symbol>
+      <symbol id="i-newfolder" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.4.6L12.4 8H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5" stroke-linecap="round"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 3.5V7h-3.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M7 9.5l3 3-3 3M12.5 15.5H17" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></symbol>
+      <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.5 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5" stroke-linecap="round"/></symbol>
+      <symbol id="i-reload" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.4 5.7M4 20.5V17h3.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke-linecap="round"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9.5L5 20.5V6z" stroke-linejoin="round"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" transform="translate(1.5 1.5) scale(0.92)"/></symbol>
+      <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <div id="app">
+    <!-- Title bar -->
+    <div id="titlebar">
+      <svg class="icon logo"><use href="#i-logo"/></svg>
+      <span id="tb-name">OpenCodex</span>
+      <span id="tb-ws" class="chip hidden">no folder</span>
+      <span class="spacer"></span>
+      <span id="tb-agent" class="chip agent hidden"></span>
+    </div>
+
+    <!-- Activity bar -->
+    <div id="activitybar">
+      <div class="act-btn active" data-view="explorer" title="Explorer"><svg class="icon"><use href="#i-folder"/></svg></div>
+      <div class="act-btn" data-view="search" title="Search"><svg class="icon"><use href="#i-search"/></svg></div>
+      <div class="act-btn" data-view="agent" title="Agent activity"><svg class="icon"><use href="#i-bot"/></svg></div>
+      <div class="act-btn" data-view="tasks" title="Task board (agent-managed)"><svg class="icon"><use href="#i-tasks"/></svg></div>
+      <div class="act-btn" data-view="skills" title="Skills (Markdown rules for the agent)"><svg class="icon"><use href="#i-skills"/></svg></div>
+      <div class="act-btn" data-view="bridge" title="Agent bridge (MCP + tunnel)"><svg class="icon"><use href="#i-bridge"/></svg></div>
+      <div class="act-btn" data-view="settings" title="Settings"><svg class="icon"><use href="#i-gear"/></svg></div>
+      <div class="spacer"></div>
+      <div class="act-btn" id="btn-open-folder" title="Open folder"><svg class="icon"><use href="#i-openfolder"/></svg></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="side-view" id="view-explorer">
+        <div class="side-header"><span>Explorer</span>
+          <span class="side-actions">
+            <button id="btn-new-file" class="ghost" title="New file"><svg class="icon sm"><use href="#i-newfile"/></svg></button>
+            <button id="btn-new-folder" class="ghost" title="New folder"><svg class="icon sm"><use href="#i-newfolder"/></svg></button>
+            <button id="btn-refresh" class="ghost" title="Refresh"><svg class="icon sm"><use href="#i-refresh"/></svg></button>
+          </span>
+        </div>
+        <div id="filetree" class="side-body"></div>
+      </div>
+
+      <div class="side-view hidden" id="view-search">
+        <div class="side-header"><span>Search</span></div>
+        <div class="side-body pad">
+          <div class="field"><svg class="icon sm"><use href="#i-search"/></svg><input id="search-input" type="text" placeholder="Search in workspace" /></div>
+          <input id="search-glob" class="txt" type="text" placeholder="Filter files, e.g. *.ts,*.py" />
+          <button id="btn-search" class="primary wide"><svg class="icon sm"><use href="#i-search"/></svg> Search</button>
+          <div id="search-results"></div>
+        </div>
+      </div>
+
+      <div class="side-view hidden" id="view-agent">
+        <div class="side-header"><span>Agent activity</span></div>
+        <div class="side-body pad">
+          <div id="jail-note" class="note"><svg class="icon sm"><use href="#i-check"/></svg>
+            <span>Tool calls are jailed to the open workspace. Writes keep backups; <code>.env</code> and <code>.git</code> are blocked.</span></div>
+          <div id="agent-log" class="log"><div class="empty">No agent activity yet.<br>Connect a chat to get started.</div></div>
+        </div>
+      </div>
+
+      <div class="side-view hidden" id="view-tasks">
+        <div class="side-header"><span>Task board</span>
+          <span class="side-actions">
+            <button id="btn-task-new" class="ghost" title="New task"><svg class="icon sm"><use href="#i-plus"/></svg></button>
+            <button id="btn-tasks-refresh" class="ghost" title="Refresh"><svg class="icon sm"><use href="#i-refresh"/></svg></button>
+          </span>
+        </div>
+        <div class="side-body pad">
+          <div class="note"><svg class="icon sm"><use href="#i-bot"/></svg><span>Cards are managed by the agent via <code>task_create</code> / <code>task_update</code>. Click a card to cycle its status.</span></div>
+          <div id="board" class="board">
+            <div class="col" data-status="todo"><h4>To do</h4><div class="cards"></div></div>
+            <div class="col" data-status="doing"><h4>Doing</h4><div class="cards"></div></div>
+            <div class="col" data-status="done"><h4>Done</h4><div class="cards"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="side-view hidden" id="view-skills">
+        <div class="side-header"><span>Skills</span>
+          <span class="side-actions">
+            <button id="btn-skill-new" class="ghost" title="New skill"><svg class="icon sm"><use href="#i-newfile"/></svg></button>
+            <button id="btn-skills-refresh" class="ghost" title="Refresh"><svg class="icon sm"><use href="#i-refresh"/></svg></button>
+          </span>
+        </div>
+        <div class="side-body pad">
+          <div class="note"><svg class="icon sm"><use href="#i-check"/></svg><span>Markdown rules in <code>.agent/skills/</code> that both connector chats and Turbo chats follow automatically.</span></div>
+          <div id="skills-list"></div>
+        </div>
+      </div>
+
+      <div class="side-view hidden" id="view-bridge">
+        <div class="side-header"><span>Agent bridge</span></div>
+        <div class="side-body pad">
+          <div class="row">
+            <button id="btn-bridge-start" class="primary"><svg class="icon sm"><use href="#i-zap"/></svg> Start server</button>
+            <button id="btn-bridge-stop">Stop</button>
+          </div>
+          <div class="row">
+            <button id="btn-tunnel-start" class="primary"><svg class="icon sm"><use href="#i-bridge"/></svg> Start tunnel</button>
+            <button id="btn-tunnel-stop">Stop</button>
+          </div>
+          <div id="bridge-status" class="status-block">Server stopped.</div>
+          <label class="chk"><input type="checkbox" id="chk-run-cmd" /> Allow agent to run commands <span class="muted">(run_command)</span></label>
+          <details open>
+            <summary>Connect ChatGPT</summary>
+            <ol>
+              <li>Start the server + tunnel above.</li>
+              <li>Copy the MCP URL below.</li>
+              <li>ChatGPT: <b>Settings → Connectors → Advanced → Developer Mode</b>.</li>
+              <li>Create → Add custom connector → paste the URL.</li>
+              <li>New chat → Developer mode → enable the connector.</li>
+            </ol>
+          </details>
+          <details>
+            <summary>Connect Claude</summary>
+            <ol>
+              <li>Start the server + tunnel above.</li>
+              <li>Copy the MCP URL below.</li>
+              <li>Claude: <b>Customize → Connectors → + → Add custom connector</b> (Pro/Max).</li>
+            </ol>
+          </details>
+        </div>
+      </div>
+
+      <div class="side-view hidden" id="view-settings">
+        <div class="side-header"><span>Settings</span></div>
+        <div class="side-body pad">
+          <div class="muted">Workspace</div>
+          <div id="set-workspace" class="mono small ws-path">none</div>
+          <button id="btn-open-folder2" class="wide"><svg class="icon sm"><use href="#i-openfolder"/></svg> Open folder…</button>
+          <div class="muted">Add chat tab</div>
+          <input id="chat-name" class="txt" type="text" placeholder="Name, e.g. Gemini" />
+          <input id="chat-url" class="txt" type="text" placeholder="https://… (full web app URL)" />
+          <button id="btn-chat-add" class="wide"><svg class="icon sm"><use href="#i-plus"/></svg> Add tab</button>
+          <div class="muted">Diagnostics</div>
+          <button id="btn-devtools" class="wide">Toggle DevTools</button>
+        </div>
+      </div>
+    </div>
+    <div id="rsb" class="resizer" title="Drag to resize"></div>
+
+    <!-- Main column -->
+    <div id="maincol">
+      <div id="editor-area">
+        <div id="tabs"></div>
+        <div id="editor-host">
+          <div id="welcome">
+            <svg class="icon hero"><use href="#i-logo"/></svg>
+            <h1>OpenCodex IDE</h1>
+            <p class="tagline">Web ChatGPT &amp; Claude, with hands on your files.</p>
+            <div class="cards">
+              <button class="card" id="wcard-open">
+                <svg class="icon"><use href="#i-openfolder"/></svg>
+                <b>Open a folder</b><span>The agent can only touch the folder you open.</span>
+              </button>
+              <button class="card" id="wcard-bridge">
+                <svg class="icon"><use href="#i-bridge"/></svg>
+                <b>Connect ChatGPT / Claude</b><span>Start the MCP server + tunnel, paste one URL.</span>
+              </button>
+              <button class="card" id="wcard-chat">
+                <svg class="icon"><use href="#i-chat"/></svg>
+                <b>Chat on the right</b><span>Real web apps — log in once, sessions persist.</span>
+              </button>
+            </div>
+            <div class="keys">
+              <span><kbd>Ctrl</kbd>+<kbd>S</kbd> save</span>
+              <span><kbd>Ctrl</kbd>+<kbd>B</kbd> sidebar</span>
+              <span><kbd>Ctrl</kbd>+<kbd>J</kbd> terminal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="bottom-panel">
+        <div id="bottom-tabs">
+          <span class="bt active" data-pane="terminal"><svg class="icon sm"><use href="#i-terminal"/></svg> Terminal</span>
+          <span class="spacer"></span>
+          <button id="btn-term-rebuild" class="ghost" title="Rebuild shell in current workspace"><svg class="icon sm"><use href="#i-reload"/></svg></button>
+        </div>
+        <div id="pane-terminal"></div>
+      </div>
+    </div>
+    <div id="rsc" class="resizer" title="Drag to resize"></div>
+
+    <!-- Chat dock -->
+    <div id="chatdock">
+      <div id="chat-tabs"></div>
+      <div id="chat-host"><div class="hint">Pick a chat tab above.<br>Your logins persist between sessions.</div></div>
+    </div>
+
+    <!-- Status bar -->
+    <div id="statusbar">
+      <svg class="icon sm logo"><use href="#i-logo"/></svg>
+      <span id="st-workspace">no folder</span>
+      <span class="spacer"></span>
+      <span id="st-agent" title="Agent activity">agent: idle</span>
+      <span id="st-bridge" title="Agent bridge">mcp: off</span>
+      <span id="st-tunnel" title="Public tunnel">tunnel: off</span>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script src="node_modules/@xterm/xterm/lib/xterm.js"></script>
+  <script src="node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+  <script src="src/renderer.js"></script>
+</body>
+</html>
